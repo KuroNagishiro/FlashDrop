@@ -1,0 +1,9 @@
+[project]
+name = "flashdrop"
+version = "1.0.0"
+description = "同一局域网内 Windows 与 Android 之间的文件/文字互传"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv]
+package = false

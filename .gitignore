@@ -1,0 +1,37 @@
+# ---------------- 运行时产物（每台机器各自生成）----------------
+config.json
+downloads/
+build/
+
+# ---------------- Python ----------------
+.venv/
+__pycache__/
+*.py[cod]
+tests/_javaclasses/
+
+# ---------------- 本机工具链（约 900MB，克隆后按需安装）----------------
+# 注意：tools/ 下的 .py 脚本要入库，这里只忽略大件
+tools/uv.exe
+tools/uv.exe.zip
+tools/uv-cache/
+tools/python/
+tools/packenv/
+tools/jdk/
+tools/android-sdk/
+tools/_dl/
+tools/_*.png
+
+# ---------------- 构建产物 ----------------
+FlashDrop.exe
+*.spec
+*.idsig
+android/build/
+android/flashdrop.keystore
+
+# ---------------- 本地工具数据 ----------------
+.workbuddy/
+
+# ---------------- 系统杂项 ----------------
+Thumbs.db
+desktop.ini
+.DS_Store
