@@ -26,28 +26,32 @@ if exist "%~dp0.venv\Scripts\python.exe" (
 )
 
 rem ---------- 1) 优先复用系统 Python（本项目零第三方依赖）----------
+rem PATH 里可能有多个 python（含没装 tkinter 的精简版），逐个试
 set "SYS_PY="
-where python >nul 2>nul && set "SYS_PY=python"
-if not defined SYS_PY (
-  where py >nul 2>nul && set "SYS_PY=py -3"
+for /f "delims=" %%i in ('where python 2^>nul') do (
+  "%%i" -c "import sys,tkinter; sys.exit(0 if sys.version_info>=(3,9) else 1)" >nul 2>nul
+  if not errorlevel 1 (
+    set "SYS_PY=%%i"
+    goto have_sys
+  )
 )
 
+py -3 -c "import sys,tkinter; sys.exit(0 if sys.version_info>=(3,9) else 1)" >nul 2>nul
+if not errorlevel 1 set "SYS_PY=py -3"
+
+:have_sys
 if defined SYS_PY (
-  %SYS_PY% -c "import sys,tkinter; sys.exit(0 if sys.version_info>=(3,9) else 1)" >nul 2>nul
-  if not errorlevel 1 (
-    echo [1/2] 检测到系统 Python，正在创建 .venv ...
-    %SYS_PY% -m venv "%~dp0.venv" >nul 2>nul
-    if exist "%~dp0.venv\Scripts\python.exe" (
-      "%~dp0.venv\Scripts\python.exe" -c "import tkinter,sys;print('  Python',sys.version.split()[0],'- tkinter OK')"
-      if not errorlevel 1 goto ok
-    )
-    echo.
-    echo [提示] 创建 .venv 失败，但系统 Python 可以直接运行本程序。
-    echo        直接双击 启动.bat 即可，无需继续。
-    pause
-    exit /b 0
+  echo [1/2] 找到可用的系统 Python，正在创建 .venv ...
+  %SYS_PY% -m venv "%~dp0.venv" >nul 2>nul
+  if exist "%~dp0.venv\Scripts\python.exe" (
+    "%~dp0.venv\Scripts\python.exe" -c "import tkinter,sys;print('  Python',sys.version.split()[0],'- tkinter OK')"
+    if not errorlevel 1 goto ok
   )
-  echo [1/2] 系统 Python 不可用（版本低于 3.9 或缺 tkinter），改用项目内置 Python。
+  echo.
+  echo [提示] 创建 .venv 失败，但系统 Python 可以直接运行本程序。
+  echo        直接双击 启动.bat 即可，无需继续。
+  pause
+  exit /b 0
 )
 
 rem ---------- 2) 用 uv 装一个只属于本项目的 Python ----------

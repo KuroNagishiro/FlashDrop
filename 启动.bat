@@ -9,25 +9,20 @@ if exist "%~dp0.venv\Scripts\pythonw.exe" (
   exit /b 0
 )
 
-rem 2) 系统 Python（3.9+ 且带 tkinter 即可，本项目零第三方依赖）
-set "PYW="
-set "PY="
-where pythonw >nul 2>nul && set "PYW=pythonw"
-where python  >nul 2>nul && set "PY=python"
-if not defined PY (
-  where py >nul 2>nul && set "PY=py -3"
+rem 2) 系统 Python：PATH 里可能有好几个，逐个验证 tkinter
+for /f "delims=" %%i in ('where python 2^>nul') do (
+  "%%i" -c "import tkinter" >nul 2>nul
+  if not errorlevel 1 (
+    set "PY=%%i"
+    goto use_py
+  )
 )
 
-if defined PY (
-  %PY% -c "import tkinter" >nul 2>nul
-  if not errorlevel 1 (
-    if defined PYW (
-      start "" %PYW% "%~dp0main.py"
-    ) else (
-      start "" %PY% "%~dp0main.py"
-    )
-    exit /b 0
-  )
+rem 3) py 启动器
+py -3 -c "import tkinter" >nul 2>nul
+if not errorlevel 1 (
+  start "" pyw -3 "%~dp0main.py"
+  exit /b 0
 )
 
 echo.
@@ -36,3 +31,12 @@ echo 请双击运行 安装环境.bat，它会准备一个只属于本项目的 
 echo.
 pause
 exit /b 1
+
+:use_py
+set "PYW=%PY:python.exe=pythonw.exe%"
+if exist "%PYW%" (
+  start "" "%PYW%" "%~dp0main.py"
+) else (
+  start "" "%PY%" "%~dp0main.py"
+)
+exit /b 0
