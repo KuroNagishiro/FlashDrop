@@ -15,23 +15,29 @@
 
 ## 快速开始
 
-### 电脑端（Windows）
+> 仓库里已经带好构建产物：**`FlashDrop.exe`（Windows，10MB）** 和 **`FlashDrop.apk`（Android，40KB）**。
+> 只是要用、不想编译的话，clone 完直接双击 exe、把 apk 装到手机即可，**不需要 Python、不需要 Android SDK**。
 
-| 你的情况 | 怎么做 |
-| --- | --- |
-| 装了 Python 3.9+（含 tkinter） | 双击 **`启动.bat`**，直接用 |
-| 没有 Python | 双击 **`安装环境.bat`**（自动装到项目内，不碰系统），再双击 `启动.bat` |
-| 想要一个独立 exe | 双击 **`打包EXE.bat`**，生成 `FlashDrop.exe`（可拷到任意电脑双击运行） |
+### 最省事：直接用打包好的文件
 
 ```bash
 git clone <仓库地址> FlashDrop
 ```
 
+- **电脑**：双击 `FlashDrop.exe`（单文件，免安装、免 Python）
+- **手机**：把 `FlashDrop.apk` 传到手机安装，或开 USB 调试后双击 `安装到手机.bat`
+
+### 电脑端（Windows）其它方式
+
+| 你的情况 | 怎么做 |
+| --- | --- |
+| 想改代码 / 用源码跑 | 有 Python 3.9+：双击 `启动.bat`；没有：先 `安装环境.bat` |
+| 改了代码想重新打包 | 双击 `打包EXE.bat`，覆盖根目录的 `FlashDrop.exe` |
+
 首次运行 Windows 会弹一次防火墙提示，**点允许**（否则手机发现不到电脑）。
+`exe` 为 64 位 Windows 版本（x64 / ARM64 的 x64 兼容模式均可）。
 
 ### 手机端（Android）
-
-仓库里自带已构建好的 `FlashDrop.apk`（约 40 KB）：
 
 - **USB 安装**：手机开启 USB 调试，双击 `安装到手机.bat`（会自动处理小米的「USB 安装提示」确认框）
 - **手动安装**：把 `FlashDrop.apk` 传到手机，点击安装
@@ -41,7 +47,7 @@ git clone <仓库地址> FlashDrop
 ### 开始互传
 
 1. 两台设备连接**同一个 WiFi**
-2. 电脑双击 `启动.bat`，手机打开 FlashDrop
+2. 电脑打开 FlashDrop（exe 或 `启动.bat`），手机打开 App
 3. 电脑端「对端」会自动出现手机（只有一个时自动选中）；选文件 → 点「发送到 xxx」
 4. 手机端收到后，在「已接收文件」里点一下即可打开，或点「打开接收文件夹」
 
@@ -59,7 +65,9 @@ git clone <仓库地址> FlashDrop
 
 ```
 FlashDrop/
-├─ main.py                 桌面端入口
+├─ FlashDrop.exe           打包好的 Windows 单文件程序（直接双击用）
+├─ FlashDrop.apk           打包好的 Android 安装包（直接安装）
+├─ main.py                 桌面端入口（源码方式运行）
 ├─ flashdrop/              桌面端源码（界面 / 引擎 / 发现 / 落盘 / 协议）
 ├─ android/
 │  ├─ src/                 手机端 Java 源码
@@ -82,7 +90,9 @@ FlashDrop/
 └─ 安装到手机.bat           通过 adb 安装 / 升级
 ```
 
-## 构建
+## 构建（可选，只是要用不必看这节）
+
+仓库里两份产物都是能直接用的成品；只有改了源码才需要重新构建。
 
 ### 生成 exe
 
@@ -90,7 +100,10 @@ FlashDrop/
 打包EXE.bat
 ```
 
-PyInstaller 安装在 `tools/packenv`（不装全局），产物 `FlashDrop.exe` 约 10 MB，单文件、免 Python 运行。
+PyInstaller 安装在 `tools/packenv`（不装全局），产物覆盖根目录的 `FlashDrop.exe`，约 10 MB、单文件、免 Python 运行。
+首次打包若本机没有 Packenv 会自动创建（需要网络装 PyInstaller），建议先跑一次 `安装环境.bat`。
+
+> 换了 exe 之后记得提交，另一台电脑 pull 下来就是新版。
 
 ### 重新构建 APK
 

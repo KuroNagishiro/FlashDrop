@@ -22,7 +22,7 @@ tools/_dl/
 tools/_*.png
 
 # ---------------- 构建产物 ----------------
-FlashDrop.exe
+# 注意：FlashDrop.exe 与 FlashDrop.apk 故意入库，方便直接取用，不要忽略
 *.spec
 *.idsig
 android/build/
