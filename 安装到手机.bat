@@ -1,12 +1,11 @@
 @echo off
-chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
 set "PY=%~dp0.venv\Scripts\python.exe"
 if not exist "%PY%" set "PY=python"
 
-rem adb æŸ¥æ‰¾é¡ºåºï¼šé¡¹ç›®å†… SDK -> PATH -> å¼€å‘æœºé—ç•™è·¯å¾„
+rem adb ²éÕÒË³Ðò£ºÏîÄ¿ÄÚ SDK -> PATH -> ¿ª·¢»úÒÅÁôÂ·¾¶
 set "ADB="
 if exist "%~dp0tools\android-sdk\platform-tools\adb.exe" set "ADB=%~dp0tools\android-sdk\platform-tools\adb.exe"
 if not defined ADB if exist "%~dp0tools\platform-tools\adb.exe" set "ADB=%~dp0tools\platform-tools\adb.exe"
@@ -16,17 +15,17 @@ if not defined ADB (
 if not defined ADB if exist "I:\aaa\QtScrcpy-win-x64-v4.2.1\adb.exe" set "ADB=I:\aaa\QtScrcpy-win-x64-v4.2.1\adb.exe"
 
 if not defined ADB (
-  echo æœªæ‰¾åˆ° adbã€‚
-  echo è¯·æŠŠ Android SDK çš„ platform-tools è§£åŽ‹åˆ° tools\platform-tools\ï¼Œ
-  echo æˆ–å®‰è£… adb å¹¶åŠ å…¥ PATHï¼Œæˆ–è®¾ç½®çŽ¯å¢ƒå˜é‡ ADB æŒ‡å‘ adb.exeã€‚
+  echo Î´ÕÒµ½ adb¡£
+  echo Çë°Ñ Android SDK µÄ platform-tools ½âÑ¹µ½ tools\platform-tools\£¬
+  echo »ò°²×° adb ²¢¼ÓÈë PATH£¬»òÉèÖÃ»·¾³±äÁ¿ ADB Ö¸Ïò adb.exe¡£
   pause
   exit /b 1
 )
 
 echo ============================================================
-echo   FlashDrop æ‰‹æœºç«¯å®‰è£… / å‡çº§
-echo   å°ç±³ä¼šå¼¹ã€ŒUSB å®‰è£…æç¤ºã€ï¼Œè„šæœ¬ä¼šè‡ªåŠ¨ç‚¹ã€Œç»§ç»­å®‰è£…ã€ã€‚
-echo   å¦‚æžœæ‰‹æœºå¤„äºŽé”å±ï¼Œè¯·å…ˆè§£é”å†è¿è¡Œæœ¬è„šæœ¬ã€‚
+echo   FlashDrop ÊÖ»ú¶Ë°²×° / Éý¼¶
+echo   Ð¡Ã×»áµ¯¡¸USB °²×°ÌáÊ¾¡¹£¬½Å±¾»á×Ô¶¯µã¡¸¼ÌÐø°²×°¡¹¡£
+echo   Èç¹ûÊÖ»ú´¦ÓÚËøÆÁ£¬ÇëÏÈ½âËøÔÙÔËÐÐ±¾½Å±¾¡£
 echo ============================================================
 echo.
 "%ADB%" push "%~dp0FlashDrop.apk" /sdcard/Download/FlashDrop.apk
@@ -34,9 +33,9 @@ echo.
 "%PY%" "%~dp0tools\adb_install.py" --force
 echo.
 if errorlevel 1 (
-  echo å®‰è£…æœªå®Œæˆã€‚è¯·è§£é”æ‰‹æœºåŽé‡è·‘æœ¬è„šæœ¬ï¼›
-  echo æˆ–åœ¨æ‰‹æœºä¸Šæ‰“å¼€ã€Œæ–‡ä»¶ç®¡ç† - ä¸‹è½½ - FlashDrop.apkã€æ‰‹åŠ¨å®‰è£…ã€‚
+  echo °²×°Î´Íê³É¡£Çë½âËøÊÖ»úºóÖØÅÜ±¾½Å±¾£»
+  echo »òÔÚÊÖ»úÉÏ´ò¿ª¡¸ÎÄ¼þ¹ÜÀí - ÏÂÔØ - FlashDrop.apk¡¹ÊÖ¶¯°²×°¡£
 ) else (
-  echo å®Œæˆã€‚ä¸¤ç«¯è¿žåŒä¸€ä¸ª WiFiã€éƒ½æ‰“å¼€ FlashDrop å³å¯äº’ä¼ ã€‚
+  echo Íê³É¡£Á½¶ËÁ¬Í¬Ò»¸ö WiFi¡¢¶¼´ò¿ª FlashDrop ¼´¿É»¥´«¡£
 )
 pause

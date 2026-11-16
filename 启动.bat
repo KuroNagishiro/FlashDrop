@@ -1,15 +1,14 @@
 @echo off
-chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
-rem 1) é¡¹ç›®è‡ªå¸¦çš„è™šæ‹Ÿç¯å¢ƒï¼ˆç”± å®‰è£…ç¯å¢ƒ.bat ç”Ÿæˆï¼‰
+rem 1) ÏîÄ¿×Ô´øµÄĞéÄâ»·¾³£¨ÓÉ °²×°»·¾³.bat Éú³É£©
 if exist "%~dp0.venv\Scripts\pythonw.exe" (
   start "" "%~dp0.venv\Scripts\pythonw.exe" "%~dp0main.py"
   exit /b 0
 )
 
-rem 2) ç³»ç»Ÿ Pythonï¼šPATH é‡Œå¯èƒ½æœ‰å¥½å‡ ä¸ªï¼Œé€ä¸ªéªŒè¯ tkinter
+rem 2) ÏµÍ³ Python£ºPATH Àï¿ÉÄÜÓĞºÃ¼¸¸ö£¬Öğ¸öÑéÖ¤ tkinter
 for /f "delims=" %%i in ('where python 2^>nul') do (
   "%%i" -c "import tkinter" >nul 2>nul
   if not errorlevel 1 (
@@ -18,7 +17,7 @@ for /f "delims=" %%i in ('where python 2^>nul') do (
   )
 )
 
-rem 3) py å¯åŠ¨å™¨
+rem 3) py Æô¶¯Æ÷
 py -3 -c "import tkinter" >nul 2>nul
 if not errorlevel 1 (
   start "" pyw -3 "%~dp0main.py"
@@ -26,8 +25,8 @@ if not errorlevel 1 (
 )
 
 echo.
-echo æœªæ‰¾åˆ°å¯ç”¨çš„ Python 3ï¼ˆéœ€è¦ 3.9+ï¼Œä¸”å¸¦ tkinterï¼‰ã€‚
-echo è¯·åŒå‡»è¿è¡Œ å®‰è£…ç¯å¢ƒ.batï¼Œå®ƒä¼šå‡†å¤‡ä¸€ä¸ªåªå±äºæœ¬é¡¹ç›®çš„ Pythonã€‚
+echo Î´ÕÒµ½¿ÉÓÃµÄ Python 3£¨ĞèÒª 3.9+£¬ÇÒ´ø tkinter£©¡£
+echo ÇëË«»÷ÔËĞĞ °²×°»·¾³.bat£¬Ëü»á×¼±¸Ò»¸öÖ»ÊôÓÚ±¾ÏîÄ¿µÄ Python¡£
 echo.
 pause
 exit /b 1

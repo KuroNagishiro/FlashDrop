@@ -1,67 +1,69 @@
 @echo off
-chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
-rem æ‰€æœ‰ä¸œè¥¿éƒ½è£…åœ¨æœ¬é¡¹ç›®ç›®å½•å†…ï¼šä¸æ”¹ç³»ç»Ÿ PATHã€ä¸è£…å…¨å±€åŒ…ã€ä¸å†™æ³¨å†Œè¡¨
+rem ËùÓĞ¶«Î÷¶¼×°ÔÚ±¾ÏîÄ¿Ä¿Â¼ÄÚ£º²»¸ÄÏµÍ³ PATH¡¢²»×°È«¾Ö°ü¡¢²»Ğ´×¢²á±í
 set "UV_CACHE_DIR=%~dp0tools\uv-cache"
 set "UV_PYTHON_INSTALL_DIR=%~dp0tools\python"
 set "UV_PROJECT_ENVIRONMENT=%~dp0.venv"
 set "UV_NO_MODIFY_PATH=1"
 
 echo ============================================================
-echo   FlashDrop ç¯å¢ƒå‡†å¤‡
-echo   å…¨éƒ¨å®‰è£…åœ¨æœ¬é¡¹ç›®ç›®å½•å†…ï¼Œä¸ä¿®æ”¹ç³»ç»Ÿç¯å¢ƒ
+echo   FlashDrop »·¾³×¼±¸
+echo   È«²¿°²×°ÔÚ±¾ÏîÄ¿Ä¿Â¼ÄÚ£¬²»ĞŞ¸ÄÏµÍ³»·¾³
 echo ============================================================
 echo.
 
-rem ---------- 0) å·²ç»å‡†å¤‡å¥½äº†ï¼Ÿ ----------
-if exist "%~dp0.venv\Scripts\python.exe" (
-  "%~dp0.venv\Scripts\python.exe" -c "import tkinter" >nul 2>nul
-  if not errorlevel 1 (
-    echo [å·²å°±ç»ª] .venv å¯ç”¨ï¼ŒåŒå‡» å¯åŠ¨.bat å³å¯è¿è¡Œã€‚
-    pause
-    exit /b 0
-  )
-)
+rem ---------- 0) ÒÑ¾­×¼±¸ºÃÁË£¿ ----------
+if not exist "%~dp0.venv\Scripts\python.exe" goto find_sys
+"%~dp0.venv\Scripts\python.exe" -c "import tkinter" >nul 2>nul
+if errorlevel 1 goto find_sys
+echo [ÒÑ¾ÍĞ÷] .venv ¿ÉÓÃ£¬Ë«»÷ Æô¶¯.bat ¼´¿ÉÔËĞĞ¡£
+pause
+exit /b 0
 
-rem ---------- 1) ä¼˜å…ˆå¤ç”¨ç³»ç»Ÿ Pythonï¼ˆæœ¬é¡¹ç›®é›¶ç¬¬ä¸‰æ–¹ä¾èµ–ï¼‰----------
-rem PATH é‡Œå¯èƒ½æœ‰å¤šä¸ª pythonï¼ˆå«æ²¡è£… tkinter çš„ç²¾ç®€ç‰ˆï¼‰ï¼Œé€ä¸ªè¯•
+rem ---------- 1) ÓÅÏÈ¸´ÓÃÏµÍ³ Python£¨±¾ÏîÄ¿³ıÍÏ·Å¿âÍâÎŞÒÀÀµ£©----------
+:find_sys
 set "SYS_PY="
 for /f "delims=" %%i in ('where python 2^>nul') do (
   "%%i" -c "import sys,tkinter; sys.exit(0 if sys.version_info>=(3,9) else 1)" >nul 2>nul
   if not errorlevel 1 (
     set "SYS_PY=%%i"
-    goto have_sys
+    goto got_sys
   )
 )
-
 py -3 -c "import sys,tkinter; sys.exit(0 if sys.version_info>=(3,9) else 1)" >nul 2>nul
 if not errorlevel 1 set "SYS_PY=py -3"
 
-:have_sys
-if defined SYS_PY (
-  echo [1/2] æ‰¾åˆ°å¯ç”¨çš„ç³»ç»Ÿ Pythonï¼Œæ­£åœ¨åˆ›å»º .venv ...
-  %SYS_PY% -m venv "%~dp0.venv" >nul 2>nul
-  if exist "%~dp0.venv\Scripts\python.exe" (
-    "%~dp0.venv\Scripts\python.exe" -c "import tkinter,sys;print('  Python',sys.version.split()[0],'- tkinter OK')"
-    if not errorlevel 1 goto ok
-  )
-  echo.
-  echo [æç¤º] åˆ›å»º .venv å¤±è´¥ï¼Œä½†ç³»ç»Ÿ Python å¯ä»¥ç›´æ¥è¿è¡Œæœ¬ç¨‹åºã€‚
-  echo        ç›´æ¥åŒå‡» å¯åŠ¨.bat å³å¯ï¼Œæ— éœ€ç»§ç»­ã€‚
-  pause
-  exit /b 0
-)
+:got_sys
+if not defined SYS_PY goto need_uv
 
-rem ---------- 2) ç”¨ uv è£…ä¸€ä¸ªåªå±äºæœ¬é¡¹ç›®çš„ Python ----------
+echo [1/2] ÕÒµ½¿ÉÓÃµÄÏµÍ³ Python£¬ÕıÔÚ´´½¨ .venv ...
+%SYS_PY% -m venv "%~dp0.venv" >nul 2>nul
+if not exist "%~dp0.venv\Scripts\python.exe" goto sys_fail
+
+echo [2/2] °²×°ÎÄ¼şÍÏ·Å¿â tkinterdnd2 ...
+"%~dp0.venv\Scripts\python.exe" -m pip install --disable-pip-version-check tkinterdnd2
+"%~dp0.venv\Scripts\python.exe" -c "import tkinter,sys;print('  Python',sys.version.split()[0],'- tkinter OK')"
+if errorlevel 1 goto sys_fail
+goto report
+
+:sys_fail
+echo.
+echo [ÌáÊ¾] .venv Ã»ÄÜ½¨ºÃ£¬µ«ÏµÍ³ Python ¿ÉÒÔÖ±½ÓÔËĞĞ±¾³ÌĞò¡£
+echo        Ö±½ÓË«»÷ Æô¶¯.bat ¼´¿É£¬ÎŞĞè¼ÌĞø¡£
+pause
+exit /b 0
+
+rem ---------- 2) ÓÃ uv ×°Ò»¸öÖ»ÊôÓÚ±¾ÏîÄ¿µÄ Python ----------
+:need_uv
 if exist "%~dp0tools\uv.exe" goto have_uv
 if exist "%~dp0tools\uv\uv.exe" (
   copy /Y "%~dp0tools\uv\uv.exe" "%~dp0tools\uv.exe" >nul
   goto have_uv
 )
 
-echo [1/3] æ­£åœ¨ä¸‹è½½ uvï¼ˆçº¦ 60MBï¼Œåªéœ€ä¸€æ¬¡ï¼‰...
+echo [1/3] ÕıÔÚÏÂÔØ uv£¨Ô¼ 60MB£¬Ö»ĞèÒ»´Î£©...
 curl -L --retry 2 --connect-timeout 20 -o "%~dp0tools\uv.zip" "https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-pc-windows-msvc.zip"
 if errorlevel 1 goto dl_fail
 if not exist "%~dp0tools\uv.zip" goto dl_fail
@@ -74,33 +76,43 @@ if not exist "%~dp0tools\uv.exe" goto dl_fail
 del /q "%~dp0tools\uv.zip" >nul 2>nul
 
 :have_uv
-echo [2/3] å®‰è£…é¡¹ç›®ç§æœ‰ Python 3.13 ...
+echo [2/3] °²×°ÏîÄ¿Ë½ÓĞ Python 3.13 ...
 "%~dp0tools\uv.exe" python install --no-bin 3.13
 if errorlevel 1 goto fail
 
-echo [3/3] åˆ›å»º .venv ...
+echo [3/3] ´´½¨ .venv ²¢°²×°ÒÀÀµ ...
 "%~dp0tools\uv.exe" venv --python 3.13 "%~dp0.venv"
 if errorlevel 1 goto fail
-
+"%~dp0tools\uv.exe" pip install --python "%~dp0.venv\Scripts\python.exe" tkinterdnd2
 "%~dp0.venv\Scripts\python.exe" -c "import tkinter,sys;print('  Python',sys.version.split()[0],'- tkinter OK')"
 if errorlevel 1 goto fail
 
-:ok
+:report
+"%~dp0.venv\Scripts\python.exe" -c "import tkinterdnd2" >nul 2>nul
+if errorlevel 1 goto no_dnd
 echo.
-echo å®Œæˆã€‚åŒå‡» å¯åŠ¨.bat è¿è¡Œï¼›éœ€è¦çœ‹æ—¥å¿—ç”¨ è°ƒè¯•å¯åŠ¨.batã€‚
+echo ÎÄ¼şÍÏ·Å£ºÒÑÆôÓÃ
+goto done
+
+:no_dnd
+echo.
+echo ÌáÊ¾£ºÎÄ¼şÍÏ·ÅÎ´ÆôÓÃ£¨tkinterdnd2 Ã»×°ÉÏ£©£¬ÆäËü¹¦ÄÜ²»ÊÜÓ°Ïì¡£
+
+:done
+echo Íê³É¡£Ë«»÷ Æô¶¯.bat ÔËĞĞ£»ĞèÒª¿´ÈÕÖ¾ÓÃ µ÷ÊÔÆô¶¯.bat¡£
 pause
 exit /b 0
 
 :dl_fail
 echo.
-echo ä¸‹è½½ uv å¤±è´¥ã€‚è¯·æ‰‹åŠ¨ä¸‹è½½ååœ¨ tools\ ä¸‹è§£å‹å‡º uv.exeï¼š
+echo ÏÂÔØ uv Ê§°Ü¡£ÇëÊÖ¶¯ÏÂÔØºóÔÚ tools\ ÏÂ½âÑ¹³ö uv.exe£º
 echo   https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-pc-windows-msvc.zip
-echo æˆ–è€…ç›´æ¥å®‰è£… Python 3.9+ï¼ˆå‹¾é€‰ tcl/tkï¼‰ï¼Œå†è¿è¡Œæœ¬è„šæœ¬ã€‚
+echo »òÕßÖ±½Ó°²×° Python 3.9+£¨¹´Ñ¡ tcl/tk£©£¬ÔÙÔËĞĞ±¾½Å±¾¡£
 pause
 exit /b 1
 
 :fail
 echo.
-echo å®‰è£…å¤±è´¥ï¼Œè¯·çœ‹ä¸Šé¢çš„é”™è¯¯ä¿¡æ¯ã€‚
+echo °²×°Ê§°Ü£¬Çë¿´ÉÏÃæµÄ´íÎóĞÅÏ¢¡£
 pause
 exit /b 1

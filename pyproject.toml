@@ -3,7 +3,8 @@ name = "flashdrop"
 version = "1.0.0"
 description = "同一局域网内 Windows 与 Android 之间的文件/文字互传"
 requires-python = ">=3.11"
-dependencies = []
+# tkinterdnd2 只用于桌面端文件拖放；缺失时程序仍可运行（降级为只能点按钮选文件）
+dependencies = ["tkinterdnd2>=0.4.0"]
 
 [tool.uv]
 package = false

@@ -10,9 +10,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from flashdrop.app import App  # noqa: E402
 
 
+def make_root() -> tuple[tk.Tk, bool]:
+    """优先使用带文件拖放能力的 Tk；tkinterdnd2 不可用时退回标准 Tk。"""
+    try:
+        from tkinterdnd2 import TkinterDnD
+        return TkinterDnD.Tk(), True
+    except Exception:
+        return tk.Tk(), False
+
+
 def main() -> None:
-    root = tk.Tk()
-    App(root)
+    root, dnd = make_root()
+    App(root, dnd=dnd)
     root.mainloop()
 
 

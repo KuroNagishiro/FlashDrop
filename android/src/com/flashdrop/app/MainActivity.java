@@ -809,35 +809,50 @@ public class MainActivity extends Activity implements Hub.Listener {
     }
 
     private void openReceivedFolder() {
-        // 依次尝试：系统文件管理器直达 → SAF 目录选择器（定位到 Download）→ 通用下载根目录
+        // 目标目录：Download/FlashDrop（ExternalStorageProvider 的 document id）
+        Uri folder = DocumentsContract.buildDocumentUri(
+                "com.android.externalstorage.documents", "primary:Download/FlashDrop");
+
+        // 1) 系统 DocumentsUI 会按 document id 直达子目录。
+        //    不能让它走系统选择器：小米文件管理器会忽略路径，只打开 Download。
+        for (String pkg : new String[]{"com.google.android.documentsui",
+                                       "com.android.documentsui"}) {
+            try {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setDataAndType(folder, DocumentsContract.Document.MIME_TYPE_DIR);
+                i.setPackage(pkg);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+                return;
+            } catch (Exception ignored) {
+                // 该 ROM 没有这个文件选择器，继续尝试下一个
+            }
+        }
+
+        // 2) 交给设备上的文件管理器（可能只能开到 Download，但至少进得去）
         try {
-            Uri folder = DocumentsContract.buildDocumentUri(
-                    "com.android.externalstorage.documents", "primary:Download/FlashDrop");
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setDataAndType(folder, DocumentsContract.Document.MIME_TYPE_DIR);
-            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             return;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
+
+        // 3) 兜底：SAF 选择器直接定位到该目录
         try {
-            Uri downloads = DocumentsContract.buildDocumentUri(
-                    "com.android.externalstorage.documents", "primary:Download");
             Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            i.putExtra(DocumentsContract.EXTRA_INITIAL_URI, downloads);
+            i.putExtra(DocumentsContract.EXTRA_INITIAL_URI, folder);
             i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             startActivity(i);
             return;
-        } catch (Exception ignored) {}
-        try {
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setDataAndType(DocumentsContract.buildRootUri(
-                    "com.android.externalstorage.documents", "primary"),
-                    DocumentsContract.Document.MIME_TYPE_DIR);
-            startActivity(i);
-        } catch (Exception e) {
-            setStatus("打不开文件夹，请用文件管理进入 Download/FlashDrop", true);
-            appendLog("打开文件夹失败：" + e);
+        } catch (Exception ignored) {
         }
+
+        setStatus("打不开文件夹，请用文件管理进入 Download/FlashDrop", true);
+        appendLog("打开接收文件夹失败：没有可用的文件管理器");
     }
 }

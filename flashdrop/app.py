@@ -272,7 +272,7 @@ class Card(tk.Frame):
 
 
 class App:
-    def __init__(self, root: tk.Tk):
+    def __init__(self, root: tk.Tk, dnd: bool = False):
         self.root = root
         self.cfg = config.load()
         self.selected: list[str] = []
@@ -281,6 +281,7 @@ class App:
         self.busy = False
         self.last_send: tuple | None = None
         self.row_paths: dict[str, Path] = {}
+        self.dnd = dnd
 
         root.title("FlashDrop · 局域网互传")
         root.configure(bg=BG)
@@ -301,6 +302,10 @@ class App:
         self._style()
         self._build()
         self._bind_wheel(self.content)
+        if self.dnd:
+            self._setup_dnd()
+        else:
+            self._dnd_off("tkinterdnd2 未加载")
         self.discovery = Discovery(
             self.cfg["id"], self.cfg["name"], "windows",
             on_change=lambda: self.ui(self.refresh_peers),
@@ -619,6 +624,78 @@ class App:
         except Exception:
             pass
 
+    # ---------- 文件拖放 ----------
+    def _setup_dnd(self) -> None:
+        """把窗口内所有控件注册成放置目标：从资源管理器拖进来即可加入发送列表。"""
+        try:
+            from tkinterdnd2 import DND_FILES
+        except Exception as e:
+            self._dnd_off(e)
+            return
+
+        total = 0
+
+        def walk(w) -> None:
+            nonlocal total
+            try:
+                w.drop_target_register(DND_FILES)
+                w.dnd_bind("<<Drop>>", self._on_drop)
+                total += 1
+            except Exception:
+                pass
+            for c in w.winfo_children():
+                walk(c)
+
+        walk(self.root)
+        if total < 2:
+            self._dnd_off("没有控件注册成功")
+            return
+        self._append_log(f"拖放已启用（{total} 个区域）")
+
+    def _dnd_off(self, reason) -> None:
+        self.dnd = False
+        try:
+            self.root.title("FlashDrop · 局域网互传（拖放未启用）")
+        except Exception:
+            pass
+        self._refresh_list()
+        self._append_log(f"拖放不可用：{reason}")
+
+    def _on_drop(self, event):
+        raw: list = []
+        try:
+            raw = list(self.root.tk.splitlist(event.data))
+        except Exception:
+            raw = [event.data] if getattr(event, "data", None) else []
+        added: list[str] = []
+        dup = 0
+        for p in raw:
+            p = str(p).strip()
+            if p.startswith("{") and p.endswith("}"):
+                p = p[1:-1]
+            p = p.strip('"')
+            if not p or not os.path.exists(p):
+                continue
+            p = os.path.normpath(p)
+            if p in self.selected or p in added:
+                dup += 1
+                continue
+            added.append(p)
+        if not added:
+            if dup:
+                self.set_status("这些已经在发送列表里了")
+            else:
+                self.set_status("拖入的内容里没有可发送的文件", error=True)
+            return "copy"
+        self.selected.extend(added)
+        self._refresh_list()
+        folders = sum(1 for p in added if os.path.isdir(p))
+        msg = f"已加入 {len(added)} 项"
+        if folders:
+            msg += f"（含 {folders} 个文件夹）"
+        self.set_status(msg + " · 点「发送到 …」发送")
+        return "copy"
+
     def jump_to_received(self) -> None:
         self.root.update_idletasks()
         self.canvas.yview_moveto(0)
@@ -771,7 +848,9 @@ class App:
             return
         self.listbox.delete(0, "end")
         if not self.selected:
-            self.listbox.insert("end", "　还没选择文件")
+            hint = ("　拖文件 / 文件夹到这里，或点「选文件」"
+                    if self.dnd else "　还没选择文件")
+            self.listbox.insert("end", hint)
             self.listbox.itemconfigure(0, foreground=SUBTLE)
             return
         for p in self.selected:

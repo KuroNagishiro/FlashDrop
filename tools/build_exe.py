@@ -101,14 +101,23 @@ def ensure_packenv() -> None:
     uv = UV if UV.exists() else "uv"
     if not PYEXE.exists():
         run([uv, "venv", "--python", "3.13", PACKENV], "1/4 创建打包专用虚拟环境")
-    probe = subprocess.run([PYEXE, "-c", "import PyInstaller,sys;print(PyInstaller.__version__)"],
-                           capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", env=env())
+    # 打包环境必须能 import 运行期依赖，否则 --collect-all 会静默跳过
+    probe = subprocess.run(
+        [PYEXE, "-c", "import PyInstaller,sys;print(PyInstaller.__version__)"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", env=env())
     if probe.returncode != 0:
         run([uv, "pip", "install", "--python", PYEXE, "pyinstaller>=6.11"],
             "2/4 安装 PyInstaller（仅装入 tools/packenv）")
     else:
         print(f">>> PyInstaller 已就位 {probe.stdout.strip()}")
+    dep = subprocess.run([PYEXE, "-c", "import tkinterdnd2"],
+                         capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", env=env())
+    if dep.returncode != 0:
+        run([uv, "pip", "install", "--python", PYEXE, "tkinterdnd2>=0.4.0"],
+            "2b/4 安装 tkinterdnd2（打包环境内，仅用于收集拖放库）")
+    else:
+        print(">>> tkinterdnd2 已就位")
 
 
 def build() -> None:
@@ -123,6 +132,8 @@ def build() -> None:
         "--specpath", BUILD,
         "--paths", ROOT,
         "--add-data", f"{ICO}{os.pathsep}assets",
+        # 拖放依赖 tkdnd 的原生库与数据文件，必须整体带上
+        "--collect-all", "tkinterdnd2",
         "--exclude-module", "tests",
         ROOT / "main.py",
     ]

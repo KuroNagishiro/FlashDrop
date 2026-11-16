@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
@@ -22,9 +21,9 @@ if not errorlevel 1 (
   goto done
 )
 
-echo æœªæ‰¾åˆ°å¯ç”¨çš„ Python 3ï¼ˆéœ€è¦ 3.9+ ä¸”å¸¦ tkinterï¼‰ï¼Œè¯·å…ˆè¿è¡Œ å®‰è£…ç¯å¢ƒ.batã€‚
+echo Î´ÕÒµ½¿ÉÓÃµÄ Python 3£¨ĞèÒª 3.9+ ÇÒ´ø tkinter£©£¬ÇëÏÈÔËĞĞ °²×°»·¾³.bat¡£
 
 :done
 echo.
-echo FlashDrop å·²é€€å‡ºï¼ˆä»£ç  %errorlevel%ï¼‰ã€‚
+echo FlashDrop ÒÑÍË³ö£¨´úÂë %errorlevel%£©¡£
 pause
