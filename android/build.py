@@ -71,7 +71,7 @@ def main() -> None:
          "--manifest", HERE / "AndroidManifest.xml",
          "-R", flat, "--java", BUILD / "gen", "--auto-add-overlay",
          "--min-sdk-version", "29", "--target-sdk-version", "36",
-         "--version-code", "4", "--version-name", "1.3"], "2/9 aapt2 link")
+         "--version-code", "5", "--version-name", "1.0.1"], "2/9 aapt2 link")
 
     java_files = sorted(str(p) for p in (HERE / "src").rglob("*.java"))
     gen_files = sorted(str(p) for p in (BUILD / "gen").rglob("*.java"))
